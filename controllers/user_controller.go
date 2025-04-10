@@ -15,11 +15,6 @@ func CreateUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Couldn't parse the request body."})
 		return
 	}
-	hashedPassword, err := utils.HashPassword(payload.Password)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Invalid passowrd."})
-		return
-	}
 	user := models.User{
 		FirstName:    payload.FirstName,
 		LastName:     payload.LastName,
