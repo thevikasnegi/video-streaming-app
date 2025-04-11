@@ -6,7 +6,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterRoutes(server *gin.Engine) {
-	server.GET("/video", getVideos)
-	server.POST("/api/user", controllers.CreateUser)
+func RegisterUserRoutes(router *gin.Engine) {
+	userGroup := router.Group("/api/users")
+	{
+		userGroup.POST("/", controllers.CreateUser)
+		userGroup.GET("/", controllers.GetAllUsers)
+		userGroup.GET("/:id", controllers.GetUser)
+		userGroup.PUT("/:id", controllers.UpdateUser)
+		userGroup.DELETE("/:id", controllers.DeleteUser)
+	}
 }

@@ -6,13 +6,11 @@ import (
 	"video-streaming-app/routes"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
 func main() {
 	server := gin.Default()
-	_ = godotenv.Load("config/.env")
-	routes.RegisterRoutes(server)
+	routes.RegisterUserRoutes(server)
 	config.ConnectDB()
 	err := config.DB.AutoMigrate(
 		&models.User{},

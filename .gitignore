@@ -1,0 +1,15 @@
+# Binaries
+*.exe
+*.out
+*.test
+
+# Env files
+config/.env
+.env
+
+# Dependency directories
+vendor/
+
+# IDE/editor configs
+.vscode/
+.idea/
