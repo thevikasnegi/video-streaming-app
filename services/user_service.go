@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"video-streaming-app/config"
 	"video-streaming-app/models"
 	"video-streaming-app/utils"
 
@@ -15,8 +14,6 @@ import (
 type userService struct {
 	db *gorm.DB
 }
-
-var UserService = &userService{db: config.DB}
 
 func (s *userService) Create(user *models.User) error {
 	user.ID = uuid.New()

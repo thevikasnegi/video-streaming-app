@@ -4,6 +4,7 @@ import (
 	"video-streaming-app/config"
 	"video-streaming-app/models"
 	"video-streaming-app/routes"
+	"video-streaming-app/services"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,6 +13,7 @@ func main() {
 	server := gin.Default()
 	routes.RegisterUserRoutes(server)
 	config.ConnectDB()
+	services.InitializeServices()
 	err := config.DB.AutoMigrate(
 		&models.User{},
 	)
