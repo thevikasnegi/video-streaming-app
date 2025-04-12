@@ -12,57 +12,82 @@ import (
 	"gorm.io/gorm"
 )
 
-func CreateUser(user *models.User) error {
+type userService struct {
+	db *gorm.DB
+}
+
+var UserService = &userService{db: config.DB}
+
+func (s *userService) Create(user *models.User) error {
 	user.ID = uuid.New()
 	hashedPassword, _ := utils.HashPassword(user.Password)
 	user.Password = hashedPassword
-	return config.DB.Create(&user).Error
+	return s.db.Create(&user).Error
 }
 
-func GetUserByID(id uuid.UUID) (*models.User, error) {
+func (s *userService) FindByID(id uuid.UUID) (*models.User, error) {
 	var user models.User
-	err := config.DB.First(&user, "id = ?", id).Error
+	err := s.db.First(&user, "id = ?", id).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
 	return &user, err
 }
 
-func GetUsers() ([]models.User, error) {
+func (s *userService) FindAll() ([]models.User, error) {
 	var users []models.User
-	err := config.DB.Find(&users).Error
+	err := s.db.Find(&users).Error
 	return users, err
 }
 
-func UpdateUser(id uuid.UUID, updatedData map[string]interface{}) error {
-	return config.DB.Model(&models.User{}).Where("id = ?", id).Updates(updatedData).Error
+func (s *userService) Update(id uuid.UUID, updatedData map[string]interface{}) error {
+	return s.db.Model(&models.User{}).Where("id = ?", id).Updates(updatedData).Error
 }
 
-func DeleteUser(id uuid.UUID) error {
-	return config.DB.Delete(&models.User{}, id).Error
+func (s *userService) Delete(id uuid.UUID) error {
+	return s.db.Delete(&models.User{}, id).Error
 }
 
-func SearchUser(params map[string]interface{}, findOne bool) (users []models.User, err error) {
+func (s *userService) Search(params map[string]interface{}, findOne bool) ([]models.User, error) {
+	var users []models.User
 	var conditions []string
 	var values []interface{}
+
 	for k, v := range params {
 		conditions = append(conditions, fmt.Sprintf("%s = ?", k))
 		values = append(values, v)
 	}
+
 	whereClause := strings.Join(conditions, " OR ")
-	err = config.DB.Where(whereClause, values...).Find(&users).Error
+
+	query := s.db.Where(whereClause, values...)
+	if findOne {
+		var user models.User
+		err := query.First(&user).Error
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return []models.User{user}, err
+	}
+
+	err := query.Find(&users).Error
 	return users, err
 }
 
-func FindUser(params map[string]interface{}) (*models.User, error) {
+func (s *userService) FindOne(params map[string]interface{}) (*models.User, error) {
 	var user models.User
 	var conditions []string
 	var values []interface{}
+
 	for k, v := range params {
 		conditions = append(conditions, fmt.Sprintf("%s = ?", k))
 		values = append(values, v)
 	}
+
 	whereClause := strings.Join(conditions, " OR ")
-	err := config.DB.Where(whereClause, values...).First(&user).Error
+	err := s.db.Where(whereClause, values...).First(&user).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return &user, nil
+		return nil, nil
 	}
 	return &user, err
 }

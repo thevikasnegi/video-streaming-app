@@ -30,7 +30,7 @@ func CreateUser(ctx *gin.Context) {
 		"email":         req.Email,
 		"mobile_number": req.MobileNumber,
 	}
-	existingUser, err := services.FindUser(queryMap)
+	existingUser, err := services.UserService.FindOne(queryMap)
 	if err != nil {
 		responses.Error(ctx, http.StatusInternalServerError, "Error searching user", err.Error())
 		return
@@ -49,7 +49,7 @@ func CreateUser(ctx *gin.Context) {
 		Password:     req.Password,
 	}
 
-	if err := services.CreateUser(user); err != nil {
+	if err := services.UserService.Create(user); err != nil {
 		responses.Error(ctx, http.StatusInternalServerError, "Failed to create user", err.Error())
 		return
 	}
@@ -65,7 +65,7 @@ func GetUser(ctx *gin.Context) {
 		return
 	}
 
-	user, err := services.GetUserByID(userID)
+	user, err := services.UserService.FindByID(userID)
 	if err != nil {
 		responses.Error(ctx, http.StatusNotFound, "User not found", err.Error())
 		return
@@ -75,7 +75,7 @@ func GetUser(ctx *gin.Context) {
 }
 
 func GetAllUsers(ctx *gin.Context) {
-	users, err := services.GetUsers()
+	users, err := services.UserService.FindAll()
 	if err != nil {
 		responses.Error(ctx, http.StatusInternalServerError, "Error fetching users", nil)
 		return
@@ -97,7 +97,7 @@ func UpdateUser(ctx *gin.Context) {
 		return
 	}
 
-	if err := services.UpdateUser(userID, updateData); err != nil {
+	if err := services.UserService.Update(userID, updateData); err != nil {
 		responses.Error(ctx, http.StatusInternalServerError, "Failed to update user", err.Error())
 		return
 	}
@@ -113,7 +113,7 @@ func DeleteUser(ctx *gin.Context) {
 		return
 	}
 
-	if err := services.DeleteUser(userID); err != nil {
+	if err := services.UserService.Delete(userID); err != nil {
 		responses.Error(ctx, http.StatusInternalServerError, "Failed to delete user", err.Error())
 		return
 	}
