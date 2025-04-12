@@ -45,7 +45,7 @@ func (s *userService) Delete(id uuid.UUID) error {
 	return s.db.Delete(&models.User{}, id).Error
 }
 
-func (s *userService) Search(params map[string]interface{}, findOne bool) ([]models.User, error) {
+func (s *userService) Search(params map[string]interface{}) ([]models.User, error) {
 	var users []models.User
 	var conditions []string
 	var values []interface{}
@@ -58,16 +58,10 @@ func (s *userService) Search(params map[string]interface{}, findOne bool) ([]mod
 	whereClause := strings.Join(conditions, " OR ")
 
 	query := s.db.Where(whereClause, values...)
-	if findOne {
-		var user models.User
-		err := query.First(&user).Error
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil
-		}
-		return []models.User{user}, err
-	}
-
 	err := query.Find(&users).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return users, nil
+	}
 	return users, err
 }
 
@@ -84,7 +78,7 @@ func (s *userService) FindOne(params map[string]interface{}) (*models.User, erro
 	whereClause := strings.Join(conditions, " OR ")
 	err := s.db.Where(whereClause, values...).First(&user).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, nil
+		return &user, nil
 	}
 	return &user, err
 }
