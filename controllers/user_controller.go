@@ -13,9 +13,11 @@ import (
 	"github.com/google/uuid"
 )
 
+type userController struct{}
+
 var validate = validator.New()
 
-func CreateUser(ctx *gin.Context) {
+func (u *userController) CreateUser(ctx *gin.Context) {
 	var req validations.CreateUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		responses.Error(ctx, http.StatusBadRequest, "Invalid request body", err.Error())
@@ -57,7 +59,7 @@ func CreateUser(ctx *gin.Context) {
 	responses.Success(ctx, http.StatusCreated, "User created successfully", user)
 }
 
-func GetUser(ctx *gin.Context) {
+func (u *userController) GetUser(ctx *gin.Context) {
 	idParam := ctx.Param("id")
 	userID, err := uuid.Parse(idParam)
 	if err != nil {
@@ -74,7 +76,7 @@ func GetUser(ctx *gin.Context) {
 	responses.Success(ctx, http.StatusOK, "User retrieved successfully", user)
 }
 
-func GetAllUsers(ctx *gin.Context) {
+func (u *userController) GetAllUsers(ctx *gin.Context) {
 	users, err := services.UserService.FindAll()
 	if err != nil {
 		responses.Error(ctx, http.StatusInternalServerError, "Error fetching users", nil)
@@ -83,7 +85,7 @@ func GetAllUsers(ctx *gin.Context) {
 	responses.Success(ctx, http.StatusOK, "User retrieved successfully", users)
 }
 
-func UpdateUser(ctx *gin.Context) {
+func (u *userController) UpdateUser(ctx *gin.Context) {
 	idParam := ctx.Param("id")
 	userID, err := uuid.Parse(idParam)
 	if err != nil {
@@ -110,7 +112,7 @@ func UpdateUser(ctx *gin.Context) {
 	responses.Success(ctx, http.StatusOK, "User updated", nil)
 }
 
-func DeleteUser(ctx *gin.Context) {
+func (u *userController) DeleteUser(ctx *gin.Context) {
 	idParam := ctx.Param("id")
 	userID, err := uuid.Parse(idParam)
 	if err != nil {
