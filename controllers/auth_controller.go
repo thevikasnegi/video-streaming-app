@@ -10,7 +10,9 @@ import (
 	"github.com/google/uuid"
 )
 
-func Login(ctx *gin.Context) {
+type authController struct{}
+
+func (a *authController) Login(ctx *gin.Context) {
 	var req validations.LoginRequest
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
