@@ -11,6 +11,8 @@ import (
 	"gorm.io/gorm"
 )
 
+var ErrDuplicateUser = errors.New("user already exists with the same email or mobile number")
+
 type userService struct {
 	db *gorm.DB
 }
@@ -38,6 +40,24 @@ func (s *userService) FindAll() ([]models.User, error) {
 }
 
 func (s *userService) Update(id uuid.UUID, updatedData map[string]interface{}) error {
+	params := make(map[string]interface{})
+	if val, ok := updatedData["email"]; ok && val != nil {
+		params["email"] = val
+	}
+	if val, ok := updatedData["mobile_number"]; ok && val != nil {
+		params["mobile_number"] = val
+	}
+
+	if len(params) != 0 {
+		existingUser, err := s.FindOne(params)
+		if err != nil {
+			return err
+		}
+		if existingUser != nil && existingUser.ID != uuid.Nil && existingUser.ID != id {
+			return ErrDuplicateUser
+		}
+	}
+
 	return s.db.Model(&models.User{}).Where("id = ?", id).Updates(updatedData).Error
 }
 

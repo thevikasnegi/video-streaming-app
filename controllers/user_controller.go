@@ -97,8 +97,13 @@ func UpdateUser(ctx *gin.Context) {
 		return
 	}
 
-	if err := services.UserService.Update(userID, updateData); err != nil {
-		responses.Error(ctx, http.StatusInternalServerError, "Failed to update user", err.Error())
+	err = services.UserService.Update(userID, updateData)
+	if err != nil {
+		if errors.Is(err, services.ErrDuplicateUser) {
+			responses.Error(ctx, http.StatusConflict, "User already exists with the same email or mobile number", nil)
+		} else {
+			responses.Error(ctx, http.StatusInternalServerError, "Failed to update user", err.Error())
+		}
 		return
 	}
 

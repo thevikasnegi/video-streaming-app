@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"video-streaming-app/models"
 
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
@@ -28,6 +29,12 @@ func ConnectDB() {
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic(fmt.Sprintf("Failed to connect to database: %v", err))
+	}
+	err = DB.AutoMigrate(
+		&models.User{},
+	)
+	if err != nil {
+		panic("Failed to auto-migrate database: " + err.Error())
 	}
 	fmt.Println("Successfully connected to database.")
 }
